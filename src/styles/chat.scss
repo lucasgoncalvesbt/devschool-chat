@@ -1,0 +1,133 @@
+.tudo {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+
+  .grupos {
+    width: 25%;
+    height: 100vh;
+    background-color: #2c3e50;
+
+    h2 {
+      text-align: center;
+      margin: 20px 0;
+      color: #fff;
+    }
+
+    .lista-chat {
+      width: 100%;
+      margin-top: 100px;
+
+      .lista-chat-item {
+        width: 95%;
+        margin: 0 auto;
+        border-radius: 10px;
+        padding: 20px 20px;
+        transition: all 0.25s;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        h4 {
+          color: #fff;
+          margin-bottom: 5px;
+        }
+
+        span {
+          font-size: 12px;
+          color: #fff;
+        }
+      }
+
+      .chat-ativo {
+        background-color: #f1c40f;
+
+        &:hover {
+          background-color: #f1c40f;
+        }
+      }
+    }
+  }
+
+  .chat {
+    width: 75%;
+    height: 100vh;
+    background-color: #eee;
+
+    .chat-header {
+      width: 100%;
+      font-size: 24px;
+      color: #2c3e50;
+      height: 10%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: ECF0F1;
+      border-bottom: 1px solid #d5dce0;
+    }
+
+    .chat-chat {
+      width: 100%;
+      height: 80%;
+      overflow-y: scroll;
+
+      .chat-container {
+        width: 70%;
+        margin: 0 auto;
+
+        display: flex;
+        flex-direction: column;
+
+        .chat-mensagem {
+          width: max-content;
+          max-width: 70%;
+          padding: 10px;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border-radius: 5px;
+        }
+
+        .minha-msg {
+          align-self: flex-end;
+          background-color: #f1c40f;
+          color: white;
+        }
+
+        .msg-outro {
+          background-color: white;
+        }
+      }
+    }
+
+    .chat-campo {
+      width: 100%;
+      height: 10%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #ecf0f1;
+
+      input,
+      button {
+        height: 50px;
+        color: #fff;
+        background-color: #2c3e50;
+        border: none;
+      }
+
+      input {
+        width: 50%;
+        border-radius: 5px;
+        padding: 0 20px;
+        margin-right: 10px;
+      }
+
+      button {
+        width: 50px;
+        border-radius: 25px;
+      }
+    }
+  }
+}
