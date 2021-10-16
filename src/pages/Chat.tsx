@@ -12,6 +12,7 @@ import { io } from 'socket.io-client';
 type RoomType = {
   _id: string;
   nome: string;
+  ultimaMensagem: { texto: string, autor: { nome: string}, createdAt: string}
 }
 
 const socket = io("localhost:3333");
@@ -30,11 +31,34 @@ const Chat = () => {
     })
   }, [socket]);
 
+  useEffect((): any => {
+    const addMsg = (data: any) => {
+      console.log(data);
+      const room = rooms.find(r => r._id === data.room._id) as RoomType;
+      room.ultimaMensagem = { 
+        texto: data.texto, 
+        autor: { nome: data.autor.nome },
+        createdAt: data.createdAt
+      }
+      const roomsMaped = rooms.map(r => {
+        if(r._id === data.room._id) {
+          return room;
+        }
+        return r;
+      });
+      setRooms(roomsMaped);
+    }
+
+    socket.on("last_message", addMsg);
+    return () => socket.off("last_message", addMsg);
+  },[rooms])
+
   useEffect(() => {
     const onLoad = async () => {
       
       const response: AxiosResponse<RoomType[]> = await api.get('/room');
       const roomsResponse: RoomType[] = response.data; 
+      console.log(roomsResponse)
       setRooms(roomsResponse);
     }
 
@@ -55,7 +79,7 @@ const Chat = () => {
               <Link to={`${url}/${room._id}`} key={room._id}>
                 <div className={"lista-chat-item " + (room._id === getRoomName() ? 'chat-ativo' : '')} >
                   <h4>{room.nome}</h4>
-                  <span>Fulano: blablablabla</span>
+                  <span>{room.ultimaMensagem?.autor.nome}: {room.ultimaMensagem?.texto}</span>
                 </div>  
               </Link>
             )
