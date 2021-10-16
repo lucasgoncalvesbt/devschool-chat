@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import './../styles/chat.scss';
+
 import { AxiosResponse } from 'axios';
-import { Link, Redirect, Route, Switch, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
-
-import "./../styles/chat.scss"
 import { ChatGroup } from './ChatGroup';
 
 type RoomType = {
@@ -13,7 +14,7 @@ type RoomType = {
 }
 
 const Chat = () => {
-  const { url } = useRouteMatch();
+  const { path, url } = useRouteMatch();
   const { pathname } = useLocation();
   const { isAuthenticated } = useAuth();
   const [rooms, setRooms] = useState<RoomType[]>([]);
@@ -40,8 +41,8 @@ const Chat = () => {
         <div className="lista-chat">
           {rooms.map((room) => {
             return (
-              <Link to={`${url}/${room._id}`}>
-                <div className={"lista-chat-item " + (room._id === getRoomName() ? 'chat-ativo' : '')} key={room._id}>
+              <Link to={`${url}/${room._id}`} key={room._id}>
+                <div className={"lista-chat-item " + (room._id === getRoomName() ? 'chat-ativo' : '')} >
                   <h4>{room.nome}</h4>
                   <span>Fulano: blablablabla</span>
                 </div>  
@@ -52,12 +53,15 @@ const Chat = () => {
         
       </div>    
         <Switch>
-          <Route path={`${url}/:roomName`}>
+          <Route exact path={path}>
+            <h3>Please select a Room.</h3>
+          </Route>
+          <Route path={`${path}/:roomName`}>
             <ChatGroup />
           </Route>
-          {/* <Route path={`${url}`}>
-            <Redirect to={`${url}/Grupo Geral`} />
-          </Route> */}
+          <Route path={`${path}/*`}>
+            <Redirect to={`${path}`} />
+          </Route>
         </Switch>
     </div>
   )

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Route, Switch } from 'react-router-dom';
+
 import { useAuth } from './hooks/useAuth';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
@@ -10,10 +11,10 @@ export default function Routes() {
   return (
     <Switch>
       <Route path="/chat">
-        {!isAuthenticated ? <Redirect to="/login"/> : <Chat />}
+        <Chat />
       </Route>
-      <Route exact path="/login">
-        {isAuthenticated ? <Redirect to="/chat"/> : <Login />}
+      <Route path="/login">
+        <Login />
       </Route>
       
     </Switch>

@@ -1,19 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
 
 import { useAuth } from '../hooks/useAuth';
-
-// const MENSAGENS = [
-//   {texto: "aaaaaaaaaaaaaaaaa", autor: "fulano de tal", hora: "20:05"},
-//   {texto: "ddddddddddddddddd", autor: "61688289f64ec13917e4c35f", hora: "20:05"},
-//   {texto: "bbbbbbbbbbbbbbbbb", autor: "fulano de tal", hora: "20:05"},
-//   {texto: "aaaaaaaaaaaaaaaaa", autor: "fulano de tal", hora: "20:05"},
-//   {texto: "ccccccccccccccccc", autor: "61688289f64ec13917e4c35f", hora: "20:05"},
-//   {texto: "fffffffffffffffff", autor: "fulano de tal", hora: "20:05"},
-// ]
-
-
 
 type MensagemType = {
   _id: string;
@@ -23,14 +12,6 @@ type MensagemType = {
   createdAt: string; 
 }
 
-const socket = io("localhost:3333");
-
-socket.on("connect", () => {
-  console.log("Conectou no socket!")
-})
-
-
-
 const ChatGroup = () => {
   const { user } = useAuth();
   
@@ -39,25 +20,45 @@ const ChatGroup = () => {
 
   const { roomName } = useParams<{roomName: string}>();
 
+  const socket = useMemo(() => io("localhost:3333"),[]);
+
   useEffect(() => {
-    socket.emit("first_access", {roomName}, (call: MensagemType[]) => {
+    socket.on("connect", () => {
+      console.log("Conectou no socket!")
+    })
+  }, [socket]);
+
+  useEffect(() => {
+    socket.emit("select_room", {roomName}, (call: MensagemType[]) => {
+      console.log(call)
       setMensagens(call);
     });
   },[roomName])
 
-  socket.on("nova_msg", (params) => {
-    setMensagens([...mensagens, params])
-  })
+  useEffect((): any => {
+    const addMsg = (params: any) => {
+      console.log(params)
+      setMensagens([...mensagens, params])
+    }
+
+    socket.on("message", addMsg);
+    return () => socket.off("message", addMsg);
+  },[mensagens])
 
   const handlerSendText = () => {
 
-    console.log({texto, room: roomName, user: user?.id});
-    socket.emit("message", {texto, room: roomName, autor: user?.id}, (call: any) => {
-      setMensagens([...mensagens, call])
-    });
+    // console.log({texto, room: roomName, user: user?.id});
+    socket.emit("message", {texto, room: roomName, autor: user?.id});
     setTexto('');
   }
+  
+  const messagesEndRef = useRef<any>(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [mensagens]);
 
   return (
       
@@ -74,6 +75,7 @@ const ChatGroup = () => {
               )
             })}
           </div>
+          <div ref={messagesEndRef}></div>
         </div>
         <div className="chat-campo">
           <input 
