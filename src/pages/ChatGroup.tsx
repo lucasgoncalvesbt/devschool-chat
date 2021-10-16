@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
-import { io, Socket } from 'socket.io-client';
-
+import { Socket } from 'socket.io-client';
+import moment  from 'moment';
 import { useAuth } from '../hooks/useAuth';
 
 type MensagemType = {
@@ -55,6 +55,11 @@ const ChatGroup = (props: { socket: Socket }) => {
 
   useEffect(scrollToBottom, [mensagens]);
 
+  const formatDate = (date: string) => {
+    const dataFormat = moment(date);
+    return dataFormat.format("H:mm");
+  }
+
   return (
       
     <div className="chat">     
@@ -64,7 +69,7 @@ const ChatGroup = (props: { socket: Socket }) => {
             {mensagens.map((mensagem) => {
               return (
                 <div  key={mensagem._id} className={"chat-mensagem " + (user?.id === mensagem.autor._id ? 'minha-msg' : 'msg-outro')}>
-                  <p>{mensagem.autor.nome} às {mensagem.createdAt}</p>
+                  <p>{mensagem.autor.nome} às {formatDate(mensagem.createdAt)}</p>
                   <p>{mensagem.texto}</p>
                 </div>
               )

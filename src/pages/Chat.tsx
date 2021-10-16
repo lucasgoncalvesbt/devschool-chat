@@ -8,11 +8,12 @@ import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import { ChatGroup } from './ChatGroup';
 import { io } from 'socket.io-client';
+import moment from 'moment';
 
 type RoomType = {
   _id: string;
   nome: string;
-  ultimaMensagem: { texto: string, autor: { nome: string}, createdAt: string}
+  ultimaMensagem: { texto: string, autor: { nome: string}, createdAt: string } | null;
 }
 
 const socket = io("localhost:3333");
@@ -68,6 +69,11 @@ const Chat = () => {
   const getRoomName = () => {
     return pathname.split("/")[2];
   }
+
+  const formatDate = (date: string) => {
+    const dataFormat = moment(date);
+    return dataFormat.format("H:mm");
+  }
   
   return (
     <div className="tudo">
@@ -79,8 +85,12 @@ const Chat = () => {
               <Link to={`${url}/${room._id}`} key={room._id}>
                 <div className={"lista-chat-item " + (room._id === getRoomName() ? 'chat-ativo' : '')} >
                   <h4>{room.nome}</h4>
-                  <span>{room.ultimaMensagem?.autor.nome}: {room.ultimaMensagem?.texto}</span>
-                </div>  
+                  {room.ultimaMensagem ? 
+                    (<span> 
+                      {formatDate(room.ultimaMensagem.createdAt)} {room.ultimaMensagem?.autor.nome}: {room.ultimaMensagem?.texto}
+                      </span>) : (<span>---</span>)
+                  }
+                  </div>  
               </Link>
             )
           })}
