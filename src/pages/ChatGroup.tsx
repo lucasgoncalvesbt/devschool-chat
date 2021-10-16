@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 import { useAuth } from '../hooks/useAuth';
 
@@ -12,7 +12,9 @@ type MensagemType = {
   createdAt: string; 
 }
 
-const ChatGroup = () => {
+
+const ChatGroup = (props: { socket: Socket }) => {
+  const {socket} = props;
   const { user } = useAuth();
   
   const [texto, setTexto] = useState("");
@@ -20,13 +22,6 @@ const ChatGroup = () => {
 
   const { roomName } = useParams<{roomName: string}>();
 
-  const socket = useMemo(() => io("localhost:3333"),[]);
-
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Conectou no socket!")
-    })
-  }, [socket]);
 
   useEffect(() => {
     socket.emit("select_room", {roomName}, (call: MensagemType[]) => {
