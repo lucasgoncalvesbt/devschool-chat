@@ -1,20 +1,31 @@
-import './../styles/chat.scss';
+import "./../styles/chat.scss";
 
-import { AxiosResponse } from 'axios';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link, Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { AxiosResponse } from "axios";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Link,
+  Redirect,
+  Route,
+  Switch,
+  useLocation,
+  useRouteMatch,
+} from "react-router-dom";
 
-import { useAuth } from '../hooks/useAuth';
-import api from '../services/api';
-import { ChatGroup } from './ChatGroup';
-import { io } from 'socket.io-client';
-import moment from 'moment';
+import { useAuth } from "../hooks/useAuth";
+import api from "../services/api";
+import { ChatGroup } from "./ChatGroup";
+import { io } from "socket.io-client";
+import moment from "moment";
 
 type RoomType = {
   _id: string;
   nome: string;
-  ultimaMensagem: { texto: string, autor: { nome: string}, createdAt: string } | null;
-}
+  ultimaMensagem: {
+    texto: string;
+    autor: { nome: string };
+    createdAt: string;
+  } | null;
+};
 
 const socket = io("localhost:3333");
 
@@ -24,57 +35,53 @@ const Chat = () => {
   const { isAuthenticated } = useAuth();
   const [rooms, setRooms] = useState<RoomType[]>([]);
 
-  
-
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Conectou no socket!")
-    })
-  }, [socket]);
+      console.log("Conectou no socket!");
+    });
+  }, []);
 
   useEffect((): any => {
     const addMsg = (data: any) => {
       console.log(data);
-      const room = rooms.find(r => r._id === data.room._id) as RoomType;
-      room.ultimaMensagem = { 
-        texto: data.texto, 
+      const room = rooms.find((r) => r._id === data.room._id) as RoomType;
+      room.ultimaMensagem = {
+        texto: data.texto,
         autor: { nome: data.autor.nome },
-        createdAt: data.createdAt
-      }
-      const roomsMaped = rooms.map(r => {
-        if(r._id === data.room._id) {
+        createdAt: data.createdAt,
+      };
+      const roomsMaped = rooms.map((r) => {
+        if (r._id === data.room._id) {
           return room;
         }
         return r;
       });
       setRooms(roomsMaped);
-    }
+    };
 
     socket.on("last_message", addMsg);
     return () => socket.off("last_message", addMsg);
-  },[rooms])
+  }, [rooms]);
 
   useEffect(() => {
     const onLoad = async () => {
-      
-      const response: AxiosResponse<RoomType[]> = await api.get('/room');
-      const roomsResponse: RoomType[] = response.data; 
-      console.log(roomsResponse)
+      const response: AxiosResponse<RoomType[]> = await api.get("/room");
+      const roomsResponse: RoomType[] = response.data;
       setRooms(roomsResponse);
-    }
+    };
 
     onLoad();
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   const getRoomName = () => {
     return pathname.split("/")[2];
-  }
+  };
 
   const formatDate = (date: string) => {
     const dataFormat = moment(date);
     return dataFormat.format("H:mm");
-  }
-  
+  };
+
   return (
     <div className="tudo">
       <div className="grupos">
@@ -83,33 +90,41 @@ const Chat = () => {
           {rooms.map((room) => {
             return (
               <Link to={`${url}/${room._id}`} key={room._id}>
-                <div className={"lista-chat-item " + (room._id === getRoomName() ? 'chat-ativo' : '')} >
-                  <h4>{room.nome}</h4>
-                  {room.ultimaMensagem ? 
-                    (<span> 
-                      {formatDate(room.ultimaMensagem.createdAt)} {room.ultimaMensagem?.autor.nome}: {room.ultimaMensagem?.texto}
-                      </span>) : (<span>---</span>)
+                <div
+                  className={
+                    "lista-chat-item " +
+                    (room._id === getRoomName() ? "chat-ativo" : "")
                   }
-                  </div>  
+                >
+                  <h4>{room.nome}</h4>
+                  {room.ultimaMensagem ? (
+                    <span>
+                      {formatDate(room.ultimaMensagem.createdAt)}{" "}
+                      {room.ultimaMensagem?.autor.nome}:{" "}
+                      {room.ultimaMensagem?.texto}
+                    </span>
+                  ) : (
+                    <span>---</span>
+                  )}
+                </div>
               </Link>
-            )
+            );
           })}
         </div>
-        
-      </div>    
-        <Switch>
-          <Route exact path={path}>
-            <h3>Please select a Room.</h3>
-          </Route>
-          <Route path={`${path}/:roomName`}>
-            <ChatGroup socket={socket}/>
-          </Route>
-          <Route path={`${path}/*`}>
-            <Redirect to={`${path}`} />
-          </Route>
-        </Switch>
+      </div>
+      <Switch>
+        <Route exact path={path}>
+          <h3>Please select a Room.</h3>
+        </Route>
+        <Route path={`${path}/:roomId`}>
+          <ChatGroup socket={socket} />
+        </Route>
+        <Route path={`${path}/*`}>
+          <Redirect to={`${path}`} />
+        </Route>
+      </Switch>
     </div>
-  )
-}
+  );
+};
 
 export default Chat;
